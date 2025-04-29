@@ -1,0 +1,1528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NLP Text Analyzer</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --primary-light: #e0e7ff;
+            --dark: #1e293b;
+            --medium: #64748b;
+            --light: #f1f5f9;
+            --danger: #ef4444;
+            --success: #22c55e;
+            --neutral: #cbd5e1;
+            --border-radius: 8px;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--dark);
+            background-color: #f8fafc;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background-color: white;
+            padding: 20px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .logo svg {
+            width: 32px;
+            height: 32px;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--dark);
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--dark);
+        }
+
+        .card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .input-container {
+            display: flex;
+            flex-wrap: wrap; /* Allow wrapping on smaller screens */
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .input-section {
+            flex: 1;
+            min-width: 300px; /* Ensure it doesn't get too small */
+        }
+
+        .options-section {
+            width: 100%; /* Default width */
+            max-width: 350px; /* Max width for options */
+            flex-shrink: 0; /* Prevent shrinking too much */
+        }
+
+
+        .textarea-container {
+            position: relative;
+            margin-bottom: 1rem;
+        }
+
+        textarea {
+            box-sizing: border-box; /* Include padding and border in the element's total width and height */
+            width: 100%;
+            height: 300px;
+            padding: 1rem;
+            border: 1px solid var(--neutral);
+            border-radius: var(--border-radius);
+            resize: vertical;
+            font-family: inherit;
+            font-size: 1rem;
+            line-height: 1.5;
+            transition: border-color 0.2s;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .word-count {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background-color: var(--light);
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            color: var(--medium);
+        }
+
+        .file-upload {
+            display: flex;
+            align-items: stretch;
+            gap: 10px;
+            margin-bottom: 1rem;
+        }
+
+        /* Make all buttons consistent */
+        .file-upload-label,
+        button.file-upload-label,
+        #analyzeBtn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 16px;
+            height: 42px;
+            min-height: 42px;
+            box-sizing: border-box;
+            font-size: 1rem;
+            font-weight: 500;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: background-color 0.2s;
+            border: none;
+            font-family: inherit;
+        }
+
+        /* Style for upload and sample buttons */
+        .file-upload-label {
+            background-color: var(--light);
+            color: var(--dark);
+        }
+
+        /* Style for analyze button */
+        #analyzeBtn {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        /* Hover states */
+        .file-upload-label:hover {
+            background-color: var(--neutral);
+        }
+
+        #analyzeBtn:hover:not(:disabled) {
+            background-color: var(--primary-hover);
+        }
+
+        .file-name {
+            margin-left: 10px;
+            font-size: 0.9rem;
+            color: var(--medium);
+             word-break: break-all; /* Prevent long filenames from overflowing */
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+         /* Style specifically for checkbox labels */
+        .checkbox-item label {
+            display: inline; /* Allow label text next to checkbox */
+            margin-bottom: 0;
+            font-weight: normal; /* Normal weight for checkbox labels */
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        input[type="range"] {
+            flex: 1;
+             cursor: pointer;
+        }
+
+        .slider-value {
+            min-width: 40px;
+            text-align: right;
+            font-weight: 500;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary);
+             cursor: pointer;
+        }
+
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            padding: 10px 20px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: inline-flex; /* Changed to inline-flex */
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            vertical-align: middle; /* Align buttons nicely if side-by-side */
+        }
+
+        button:hover:not(:disabled) { /* Only apply hover when not disabled */
+            background-color: var(--primary-hover);
+        }
+
+        button:disabled {
+            background-color: var(--neutral);
+            cursor: not-allowed;
+            opacity: 0.7; /* Indicate disabled state */
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        .loading {
+            display: none; /* Hidden by default */
+            align-items: center;
+            justify-content: center;
+            margin: 2rem 0;
+            flex-direction: column; /* Stack spinner and text vertically */
+            gap: 10px; /* Space between spinner, text, progress bar */
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--primary-light);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-weight: 500;
+        }
+
+        .results-container {
+            display: none; /* Hidden by default */
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--neutral);
+            margin-bottom: 1.5rem;
+            overflow-x: auto; /* Allow horizontal scrolling on small screens */
+        }
+
+        .tab {
+            padding: 0.8rem 1.5rem;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            font-weight: 500;
+            transition: all 0.2s;
+            white-space: nowrap; /* Prevent tabs from wrapping */
+             flex-shrink: 0; /* Prevent tabs from shrinking */
+        }
+
+        .tab:hover {
+            color: var(--primary);
+        }
+
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .tab-content {
+            display: none; /* Hidden by default */
+        }
+
+        .tab-content.active {
+            display: block; /* Show active tab */
+        }
+
+        .summary-content {
+            line-height: 1.6;
+            padding-bottom: 1rem; /* Add some space below summary text */
+        }
+
+        .key-phrases {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 1rem;
+            padding-bottom: 1rem; /* Add some space below key phrases */
+        }
+
+        .key-phrase {
+            background-color: var(--primary-light);
+            color: var(--primary);
+            padding: 4px 12px;
+            border-radius: 100px;
+            font-size: 0.9rem;
+            font-weight: 500; /* Make phrases slightly bolder */
+        }
+
+        .sentiment-analysis {
+            margin-top: 1rem;
+        }
+
+        .sentiment-analysis h3 {
+            font-size: 1.2rem;
+            margin-bottom: 0.8rem;
+        }
+
+
+        .sentiment-meter {
+            height: 10px;
+            width: 100%;
+            background-color: #e5e5e5;
+            border-radius: 5px;
+            margin: 1rem 0;
+            position: relative;
+            overflow: hidden; /* Ensure indicator doesn't overflow */
+        }
+
+        /* Optional: Add gradient to meter background */
+        .sentiment-meter::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(to right, var(--danger), #ffff00, var(--success)); /* Red to Yellow to Green */
+            border-radius: 5px;
+        }
+
+
+        .sentiment-indicator {
+            position: absolute;
+            top: -5px; /* Adjust position slightly */
+            width: 20px;
+            height: 20px;
+            background-color: var(--dark); /* Dark indicator for visibility */
+            border: 2px solid white; /* White border */
+            border-radius: 50%;
+            transform: translateX(-50%);
+            transition: left 0.5s ease;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2); /* Add subtle shadow */
+            z-index: 1; /* Ensure indicator is above gradient */
+        }
+
+        .sentiment-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: var(--medium);
+        }
+
+        .statistics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); /* Adjust minmax */
+            gap: 1rem;
+            margin-top: 1rem;
+             padding-bottom: 1rem; /* Add space */
+        }
+
+        .statistic-card {
+            background-color: var(--light);
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .statistic-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.3rem;
+        }
+
+        .statistic-label {
+            font-size: 0.9rem;
+            color: var(--medium);
+        }
+
+        .sentence-analysis {
+            margin-top: 1rem;
+            max-height: 400px; /* Limit height and add scroll */
+            overflow-y: auto; /* Enable vertical scroll */
+            border: 1px solid var(--neutral); /* Add border */
+            border-radius: var(--border-radius); /* Rounded corners */
+            padding: 0.5rem; /* Padding inside scroll area */
+        }
+
+
+        .sentence {
+            padding: 0.8rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 0.5rem;
+            border-left: 4px solid transparent;
+            font-size: 0.95rem; /* Slightly smaller font */
+        }
+
+        .sentence.positive {
+            background-color: rgba(34, 197, 94, 0.1);
+            border-left-color: var(--success);
+        }
+
+        .sentence.negative {
+            background-color: rgba(239, 68, 68, 0.1);
+            border-left-color: var(--danger);
+        }
+
+        .sentence.neutral {
+            background-color: rgba(203, 213, 225, 0.2);
+            border-left-color: var(--neutral);
+        }
+
+        .sentence-score {
+            float: right;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-left: 10px; /* Space between text and score */
+        }
+
+        .sentence-score.positive {
+            color: var(--success);
+        }
+
+        .sentence-score.negative {
+            color: var(--danger);
+        }
+
+        .sentence-score.neutral {
+            color: var(--medium);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 2rem 0;
+            margin-top: 2rem;
+            color: var(--medium);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--light); /* Add separator */
+        }
+
+        /* Alert component */
+        .alert {
+            padding: 12px 16px;
+            border-radius: var(--border-radius);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            position: relative; /* For close button */
+        }
+         .alert-close {
+             position: absolute;
+             top: 8px;
+             right: 10px;
+             background: none;
+             border: none;
+             font-size: 1.2rem;
+             cursor: pointer;
+             color: inherit; /* Inherit color from alert type */
+             padding: 0;
+             line-height: 1;
+         }
+
+        .alert-icon {
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .alert-content {
+            flex: 1;
+        }
+
+        .alert-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .alert-info {
+            background-color: #e0f2fe;
+            color: #0369a1;
+            border-left: 4px solid #0ea5e9;
+        }
+
+        .alert-warning {
+            background-color: #fef9c3;
+            color: #854d0e;
+            border-left: 4px solid #eab308;
+        }
+
+        .alert-error {
+            background-color: #fee2e2;
+            color: #b91c1c;
+            border-left: 4px solid #ef4444;
+        }
+
+        .alert-success {
+            background-color: #dcfce7;
+            color: #166534;
+            border-left: 4px solid #22c55e;
+        }
+
+        .copy-button {
+            /* margin-bottom: 1rem; Remove bottom margin */
+            margin-top: 1rem; /* Add top margin */
+            background-color: var(--light);
+            color: var(--dark);
+            font-size: 0.9rem; /* Smaller font size */
+            padding: 6px 12px; /* Smaller padding */
+            float: right; /* Position to the right */
+        }
+
+        .copy-button:hover:not(:disabled) {
+            background-color: var(--neutral);
+        }
+
+        .copy-button svg {
+            width: 14px; /* Smaller icon */
+            height: 14px;
+            margin-right: 6px;
+        }
+
+        /* Progress bar for loading simulation */
+        .progress-bar {
+            height: 4px;
+            background-color: var(--primary);
+            border-radius: 2px;
+            width: 0;
+            transition: width 0.2s ease;
+            /* margin-top: 10px; Removed margin-top as gap is used in flex container */
+        }
+
+        /* Ensure responsiveness */
+        @media (max-width: 992px) { /* Adjust breakpoint if needed */
+            .input-container {
+                flex-direction: column;
+            }
+            .options-section {
+                width: 100%;
+                max-width: none; /* Remove
+            }
+        }
+        @media (max-width: 768px) {
+             h1 { font-size: 1.8rem; }
+             h2 { font-size: 1.3rem; }
+             .card { padding: 1rem; }
+             textarea { height: 250px; }
+             .statistics { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); } /* Adjust stats grid */
+             .statistic-value { font-size: 1.5rem; }
+             .tabs { margin-bottom: 1rem; }
+             .tab { padding: 0.6rem 1rem; }
+        }
+         @media (max-width: 480px) {
+             h1 { font-size: 1.5rem; }
+             textarea { height: 200px; }
+             .statistics { grid-template-columns: 1fr 1fr; } /* Force 2 columns */
+             .statistic-card { padding: 0.8rem; }
+             .file-upload { flex-direction: column; align-items: flex-start; }
+             .file-name { margin-left: 0; margin-top: 5px; }
+         }
+
+         /* Add focus styles */
+.tab:focus,
+button:focus,
+textarea:focus {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 15c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1s1 .45 1 1v4c0 .55-.45 1-1 1zm0-8c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1z"/>
+                </svg>
+                NLP Text Analyzer
+            </div>
+             </div>
+    </header>
+
+    <div class="container">
+        <div class="card">
+            <h1>Advanced Text Analysis Tool</h1>
+             <div id="alertContainer"></div> <div class="alert alert-info">
+                 <button type="button" class="alert-close" onclick="this.parentElement.remove()">×</button>
+                <div class="alert-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M12 16v-4"></path>
+                        <path d="M12 8h.01"></path>
+                    </svg>
+                </div>
+                <div class="alert-content">
+                    <div class="alert-title">How to use this tool</div>
+                    <p>Paste your text or upload a document (.txt), configure analysis options, and click "Analyze Text". Use Ctrl/Cmd+Enter to analyze or Ctrl/Cmd+L to load sample text.</p>
+                </div>
+            </div>
+
+            <div class="input-container">
+                <div class="input-section">
+                    <h2>Input Text</h2>
+                    <div class="file-upload">
+                        <label class="file-upload-label" for="fileInput"> <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                                 <line x1="12" y1="18" x2="12" y2="12"></line>
+                                 <line x1="9" y1="15" x2="15" y2="15"></line>
+                            </svg>
+                            Upload .txt File
+                            <input type="file" id="fileInput" style="display: none;" accept=".txt"> </label>
+                         <button type="button" id="sampleTextBtn" class="file-upload-label">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                 <polyline points="14 2 14 8 20 8"></polyline>
+                                 <line x1="16" y1="13" x2="8" y2="13"></line>
+                                 <line x1="16" y1="17" x2="8" y2="17"></line>
+                                 <polyline points="10 9 9 9 8 9"></polyline>
+                             </svg>
+                             Load Sample
+                         </button>
+                        <span id="fileName" class="file-name">No file selected</span>
+                    </div>
+                    <div class="textarea-container">
+                        <textarea id="textInput" placeholder="Paste your article or document here..."></textarea>
+                        <div id="wordCount" class="word-count">0 words</div>
+                    </div>
+                </div>
+
+                <div class="options-section">
+                    <h2>Analysis Options</h2>
+                    <div class="form-group">
+                        <label for="summaryLength">Summary Length (Target %)</label>
+                        <div class="slider-container">
+                            <input type="range" id="summaryLength" min="10" max="70" value="30" step="5"> <span id="summaryLengthValue" class="slider-value">30%</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Analysis Features</label>
+                        <div class="checkbox-group">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="summarizationCheck" checked>
+                                <label for="summarizationCheck">Text Summarization</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="keyPhrasesCheck" checked>
+                                <label for="keyPhrasesCheck">Key Phrase Extraction</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="sentimentCheck" checked>
+                                <label for="sentimentCheck">Sentiment Analysis</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="button-container">
+                        <button id="analyzeBtn">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="m9 9 5 12 7-7-7-7-5 2m0 0 7 7"/> </svg>
+                            Analyze Text
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="loadingIndicator" class="loading">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">Analyzing text... Please wait.</div>
+            <div class="progress-bar"></div> </div>
+
+        <div id="resultsContainer" class="card results-container">
+            <h2>Analysis Results</h2>
+            <div class="tabs" role="tablist">
+                <div class="tab active" data-tab="summary" role="tab" tabindex="0">Summary</div>
+                <div class="tab" data-tab="keyphrases" role="tab" tabindex="0">Key Phrases</div>
+                <div class="tab" data-tab="sentiment" role="tab" tabindex="0">Sentiment</div>
+                <div class="tab" data-tab="statistics" role="tab" tabindex="0">Statistics</div>
+            </div>
+
+            <div id="summaryTab" class="tab-content active">
+                <h3>Generated Summary</h3>
+                <div id="summaryContent" class="summary-content">Select features and click 'Analyze Text'.</div>
+            </div>
+
+            <div id="keyPhrasesTab" class="tab-content">
+                 <h3>Extracted Key Phrases</h3>
+                <div id="keyPhrasesList" class="key-phrases">No key phrases extracted yet.</div>
+            </div>
+
+            <div id="sentimentTab" class="tab-content">
+                <div class="sentiment-analysis">
+                    <h3>Overall Sentiment</h3>
+                     <p id="overallSentimentLabel" style="text-align: center; font-weight: bold; font-size: 1.1rem; margin-bottom: 0.5rem;">Neutral</p>
+                    <div class="sentiment-meter">
+                        <div id="sentimentIndicator" class="sentiment-indicator" style="left: 50%;"></div>
+                    </div>
+                    <div class="sentiment-labels">
+                        <span>Very Negative</span>
+                        <span>Neutral</span>
+                        <span>Very Positive</span>
+                    </div>
+                    <h3 style="margin-top: 2rem;">Sentence-Level Analysis</h3>
+                    <div id="sentenceAnalysis" class="sentence-analysis">No sentence analysis performed yet.</div>
+                </div>
+            </div>
+
+            <div id="statisticsTab" class="tab-content">
+                 <h3>Text Statistics</h3>
+                <div class="statistics">
+                    <div class="statistic-card">
+                        <div id="wordCountStat" class="statistic-value">0</div>
+                        <div class="statistic-label">Words</div>
+                    </div>
+                    <div class="statistic-card">
+                        <div id="sentenceCountStat" class="statistic-value">0</div>
+                        <div class="statistic-label">Sentences</div>
+                    </div>
+                    <div class="statistic-card">
+                        <div id="charCountStat" class="statistic-value">0</div>
+                         <div class="statistic-label">Characters</div>
+                    </div>
+                     <div class="statistic-card">
+                        <div id="readingTimeStat" class="statistic-value">0 min</div>
+                        <div class="statistic-label">Est. Reading Time</div>
+                    </div>
+                </div>
+                <div class="statistics">
+                    <div class="statistic-card">
+                        <div id="avgSentenceLengthStat" class="statistic-value">0</div>
+                        <div class="statistic-label">Avg. Words/Sentence</div>
+                    </div>
+                    <div class="statistic-card">
+                        <div id="positiveSentencesStat" class="statistic-value">0%</div>
+                        <div class="statistic-label">Positive Sentences</div>
+                    </div>
+                    <div class="statistic-card">
+                        <div id="neutralSentencesStat" class="statistic-value">0%</div>
+                        <div class="statistic-label">Neutral Sentences</div>
+                    </div>
+                    <div class="statistic-card">
+                        <div id="negativeSentencesStat" class="statistic-value">0%</div>
+                        <div class="statistic-label">Negative Sentences</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+         <p>&copy; <span id="copyright-year"></span> Alexander Huseby</p>
+    </footer>
+
+    <script>
+        // --- DOM Elements ---
+        const textInput = document.getElementById('textInput');
+        const fileInput = document.getElementById('fileInput');
+        const fileName = document.getElementById('fileName');
+        const wordCount = document.getElementById('wordCount');
+        const summaryLength = document.getElementById('summaryLength');
+        const summaryLengthValue = document.getElementById('summaryLengthValue');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const summaryContent = document.getElementById('summaryContent');
+        const keyPhrasesList = document.getElementById('keyPhrasesList'); // Target for key phrases
+        const sentimentIndicator = document.getElementById('sentimentIndicator');
+        const sentenceAnalysis = document.getElementById('sentenceAnalysis'); // Target for sentence results
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const alertContainer = document.getElementById('alertContainer');
+        const sampleTextBtn = document.getElementById('sampleTextBtn');
+        const overallSentimentLabel = document.getElementById('overallSentimentLabel');
+        const copyrightYear = document.getElementById('copyright-year');
+
+        // Statistics DOM elements
+        const wordCountStat = document.getElementById('wordCountStat');
+        const sentenceCountStat = document.getElementById('sentenceCountStat');
+        const charCountStat = document.getElementById('charCountStat');
+        const avgSentenceLengthStat = document.getElementById('avgSentenceLengthStat');
+        const readingTimeStat = document.getElementById('readingTimeStat');
+        const positiveSentencesStat = document.getElementById('positiveSentencesStat');
+        const neutralSentencesStat = document.getElementById('neutralSentencesStat');
+        const negativeSentencesStat = document.getElementById('negativeSentencesStat');
+
+        // Feature checkboxes
+        const summarizationCheck = document.getElementById('summarizationCheck');
+        const keyPhrasesCheck = document.getElementById('keyPhrasesCheck');
+        const sentimentCheck = document.getElementById('sentimentCheck');
+
+        // --- Constants & Configuration ---
+        const READING_SPEED_WPM = 225;
+        const STOPWORDS = new Set([ // Using the expanded list from the previous attempt
+             'i', 'me', 'my', 'myself', 'we', 'our', 'ours', 'ourselves', 'you', 'your', 'yours', 'yourself', 'yourselves',
+            'he', 'him', 'his', 'himself', 'she', 'her', 'hers', 'herself', 'it', 'its', 'itself', 'they', 'them', 'their',
+            'theirs', 'themselves', 'what', 'which', 'who', 'whom', 'this', 'that', 'these', 'those', 'am', 'is', 'are',
+            'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'having', 'do', 'does', 'did', 'doing', 'a', 'an',
+            'the', 'and', 'but', 'if', 'or', 'because', 'as', 'until', 'while', 'of', 'at', 'by', 'for', 'with', 'about',
+            'against', 'between', 'into', 'through', 'during', 'before', 'after', 'above', 'below', 'to', 'from', 'up',
+            'down', 'in', 'out', 'on', 'off', 'over', 'under', 'again', 'further', 'then', 'once', 'here', 'there', 'when',
+            'where', 'why', 'how', 'all', 'any', 'both', 'each', 'few', 'more', 'most', 'other', 'some', 'such', 'no',
+            'nor', 'not', 'only', 'own', 'same', 'so', 'than', 'too', 'very', 's', 't', 'can', 'will', 'just', 'don',
+            'should', 'now', 'd', 'll', 'm', 'o', 're', 've', 'y', 'ain', 'aren', 'couldn', 'didn', 'doesn', 'hadn',
+            'hasn', 'haven', 'isn', 'ma', 'mightn', 'mustn', 'needn', 'shan', 'shouldn', 'wasn', 'weren', 'won', 'wouldn'
+        ]);
+
+        // --- Event Listeners ---
+        textInput.addEventListener('input', updateWordCount);
+        fileInput.addEventListener('change', handleFileUpload);
+        summaryLength.addEventListener('input', updateSummaryLengthValue);
+        analyzeBtn.addEventListener('click', analyzeText);
+        sampleTextBtn.addEventListener('click', loadSampleText);
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                const tabId = tab.getAttribute('data-tab');
+                const activeContent = document.getElementById(`${tabId}Tab`);
+                if (activeContent) activeContent.classList.add('active');
+            });
+        });
+
+         [summarizationCheck, keyPhrasesCheck, sentimentCheck].forEach(checkbox => {
+             checkbox.addEventListener('change', () => {
+                 if (!summarizationCheck.checked && !keyPhrasesCheck.checked && !sentimentCheck.checked) {
+                     showAlert('At least one analysis feature must be selected.', 'warning');
+                     checkbox.checked = true;
+                 }
+             });
+         });
+
+        // --- Utility Functions ---
+
+        function updateWordCount() {
+            const text = textInput?.value?.trim() ?? ''; // Use optional chaining
+            const words = text === '' ? 0 : text.split(/\s+/).filter(Boolean).length;
+            if (wordCount) wordCount.textContent = `${words} words`;
+        }
+
+        function handleFileUpload(event) {
+            // Add more robust file type checking
+            const validTypes = ['text/plain', 'text/html', 'application/rtf'];
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            if (!validTypes.includes(file.type)) {
+                showAlert('Please upload a valid text file (.txt, .rtf)', 'error');
+                fileInput.value = '';
+                return;
+            }
+        }
+
+        function updateSummaryLengthValue() {
+            if(summaryLengthValue && summaryLength) {
+                 summaryLengthValue.textContent = `${summaryLength.value}%`;
+            }
+        }
+
+        function splitIntoSentences(text) {
+             if (!text) return [];
+             const sentences = text
+                 .replace(/([.!?])\s*(?=[A-Z"'\(\[\{])/g, "$1\r\n")
+                 .replace(/(\.)([A-Z][a-z]+\.)/g, "$1 $2")
+                 .split(/[\r\n]+/)
+                 .map(s => s.trim())
+                 .filter(s => s.length > 1);
+             return sentences.length > 0 ? sentences : (text.trim() ? [text.trim()] : []);
+         }
+
+
+        function tokenizeWords(text) {
+            return text.toLowerCase().match(/\b[a-z]+(?:'[a-z]+)?\b/g) || [];
+        }
+
+        function removeStopwords(words) {
+            return words.filter(word => !STOPWORDS.has(word));
+        }
+
+        function calculateTermFrequency(words) {
+            return words.reduce((freq, word) => {
+                freq[word] = (freq[word] || 0) + 1;
+                return freq;
+            }, {});
+        }
+
+        function showAlert(message, type = 'info', duration = 5000) {
+             try {
+                if (!alertContainer) { // Check if container exists
+                    console.error("Alert container not found! Cannot display alert:", message);
+                    return;
+                }
+                const alertElement = document.createElement('div');
+                alertElement.className = `alert alert-${type}`;
+
+                const closeButton = document.createElement('button');
+                closeButton.type = 'button';
+                closeButton.className = 'alert-close';
+                closeButton.innerHTML = '&times;';
+                closeButton.onclick = () => alertElement.remove();
+                alertElement.appendChild(closeButton); // Add close button FIRST
+
+                const iconContainer = document.createElement('div');
+                iconContainer.className = 'alert-icon';
+                let iconSymbol = 'ℹ️';
+                if (type === 'success') iconSymbol = '✅';
+                if (type === 'warning') iconSymbol = '⚠️';
+                if (type === 'error') iconSymbol = '❌';
+                iconContainer.textContent = iconSymbol;
+                alertElement.appendChild(iconContainer);
+
+                const content = document.createElement('div');
+                content.className = 'alert-content';
+                content.textContent = message;
+                alertElement.appendChild(content);
+
+                alertContainer.prepend(alertElement);
+
+                if (duration > 0) {
+                    const timerId = setTimeout(() => {
+                        if (alertElement?.parentNode) { // Optional chaining check
+                            alertElement.style.transition = 'opacity 0.5s ease';
+                            alertElement.style.opacity = '0';
+                            setTimeout(() => alertElement.remove(), 500);
+                        }
+                    }, duration);
+                    closeButton.addEventListener('click', () => clearTimeout(timerId), { once: true });
+                }
+             } catch (error) {
+                console.error("Error displaying alert:", error);
+             }
+         }
+
+        function showLoadingIndicator(show, message = "Analyzing text...") {
+            const progressBar = loadingIndicator?.querySelector('.progress-bar');
+             if (show) {
+                 if (loadingIndicator) loadingIndicator.style.display = 'flex';
+                 const loadingTextElem = loadingIndicator?.querySelector('.loading-text');
+                 if (loadingTextElem) loadingTextElem.textContent = message;
+                 if(progressBar) progressBar.style.width = '0%';
+             } else {
+                 if (loadingIndicator) loadingIndicator.style.display = 'none';
+             }
+             if (analyzeBtn) analyzeBtn.disabled = show;
+             return progressBar;
+         }
+
+         function simulateProgress(progressBar, duration = 1500) {
+             if (!progressBar) return null;
+             let progress = 0;
+             const intervalTime = 50;
+             const steps = duration / intervalTime;
+             let currentStep = 0;
+             progressBar.style.width = '0%';
+
+             const interval = setInterval(() => {
+                 currentStep++;
+                 progress = Math.min(100, progress + (100 - progress) * 0.1 + Math.random() * 5);
+                 progressBar.style.width = `${progress}%`;
+                 if (currentStep >= steps) {
+                     progressBar.style.width = '100%';
+                     clearInterval(interval);
+                 }
+             }, intervalTime);
+             return interval;
+         }
+
+        function loadSampleText() {
+              const sampleText = `Natural Language Processing (NLP) is a fascinating and rapidly evolving field at the intersection of computer science, artificial intelligence, and linguistics. It focuses on enabling computers to understand, interpret, generate, and interact with human language in a meaningful way. The ultimate goal? To bridge the communication gap between humans and machines.
+
+ Core NLP tasks include sentiment analysis (determining emotional tone), text summarization (condensing information), named entity recognition (identifying key entities like people or places), machine translation (converting text between languages), and question answering. These capabilities power many applications we use daily, from virtual assistants like Siri and Alexa to spam filters and automated customer support chatbots.
+
+ The technology behind NLP has advanced significantly, especially with the advent of deep learning models like transformers (e.g., BERT, GPT-3/4). These models learn complex patterns and contextual nuances from vast amounts of text data, achieving remarkable performance on various benchmarks. However, challenges remain. Understanding sarcasm, handling low-resource languages, mitigating biases present in training data, and achieving true common-sense reasoning are active areas of research. Not all models are perfect, and some fail badly. It's not always easy.
+
+ Despite these hurdles, NLP's impact is undeniable. It helps organizations analyze customer feedback, researchers extract insights from scientific literature, and individuals overcome language barriers. It's not a useless field; it is very helpful. As the volume of digital text continues to explode, NLP tools become increasingly crucial for navigating and making sense of this information overload. The future promises even more sophisticated and integrated language technologies, further transforming how we live and work.`;
+             if (textInput) {
+                textInput.value = sampleText;
+                updateWordCount();
+                showAlert('Sample text loaded.', 'info', 2000);
+             }
+         }
+
+         function addCopyButton(tabId, contentSelector, buttonText) {
+            try {
+                const tabElement = document.getElementById(tabId);
+                if (!tabElement) { console.warn(`Copy Button: Tab element ${tabId} not found.`); return; }
+                const contentElement = tabElement.querySelector(contentSelector);
+                 if (!contentElement) { console.warn(`Copy Button: Content element ${contentSelector} not found in ${tabId}.`); return; }
+
+                let copyButton = tabElement.querySelector('.copy-button');
+                if (!copyButton) {
+                    copyButton = document.createElement('button');
+                    copyButton.className = 'copy-button';
+                     // Ensure button is placed correctly relative to content
+                     // Using insertBefore with contentElement as reference should place
+                     tabElement.insertBefore(copyButton, contentElement);
+                }
+
+                copyButton.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                    ${buttonText}
+                `;
+
+                // Clone and replace to remove old listeners safely
+                const newCopyButton = copyButton.cloneNode(true);
+                copyButton.parentNode.replaceChild(newCopyButton, copyButton);
+
+                newCopyButton.addEventListener('click', () => {
+                     let textToCopy = '';
+                     if (tabId === 'summaryTab') {
+                         textToCopy = Array.from(contentElement.querySelectorAll('p')).map(p => p.textContent).join('\n\n');
+                     } else if (tabId === 'keyPhrasesTab') {
+                         textToCopy = Array.from(contentElement.querySelectorAll('.key-phrase')).map(el => el.textContent).join(', ');
+                     }
+
+                     if (textToCopy && navigator.clipboard) {
+                        navigator.clipboard.writeText(textToCopy)
+                            .then(() => showAlert(`${buttonText} copied!`, 'success', 2000))
+                            .catch(err => {
+                                console.error('Clipboard Error:', err);
+                                showAlert(`Failed to copy. See console.`, 'error');
+                             });
+                     } else if (!textToCopy) {
+                          showAlert('Nothing to copy.', 'warning', 2000);
+                     } else {
+                          showAlert('Clipboard access not available or denied.', 'error');
+                     }
+                 });
+             } catch (error) {
+                console.error("Error adding copy button:", error);
+             }
+         }
+
+
+        function addKeyboardShortcuts() {
+             document.addEventListener('keydown', (e) => {
+                 if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                     e.preventDefault();
+                     if (analyzeBtn && !analyzeBtn.disabled) analyzeBtn.click();
+                 }
+                 if ((e.ctrlKey || e.metaKey) && e.key === 'l') {
+                     e.preventDefault();
+                     loadSampleText();
+                 }
+             });
+         }
+
+
+        // --- Core Analysis Functions ---
+
+         function generateSummary(sentences, percentageToKeep) {
+            // console.log("generateSummary called"); // Keep console logs if needed for debugging
+            if (!sentences || sentences.length === 0) return "No text provided for summary.";
+            const numSentencesTotal = sentences.length;
+            const numSentencesToKeep = Math.max(1, Math.ceil(numSentencesTotal * percentageToKeep));
+            if (numSentencesToKeep >= numSentencesTotal) return sentences.join(' ');
+
+            try {
+                const allWords = removeStopwords(tokenizeWords(sentences.join(' ')));
+                const globalWordFreq = calculateTermFrequency(allWords);
+                const scoredSentences = sentences.map((sentence, index) => {
+                    const words = removeStopwords(tokenizeWords(sentence));
+                    let score = words.reduce((acc, word) => acc + (globalWordFreq[word] || 0), 0);
+                    score = words.length > 0 ? score / Math.log(words.length + 1) : 0;
+                    if (index === 0) score *= 1.5;
+                    return { sentence, score, index };
+                });
+                scoredSentences.sort((a, b) => b.score - a.score);
+                const selected = scoredSentences.slice(0, numSentencesToKeep);
+                selected.sort((a, b) => a.index - b.index);
+                return selected.map(item => item.sentence).join(' ');
+             } catch (error) {
+                console.error("Error in generateSummary:", error);
+                showAlert("Error generating summary.", "error");
+                return "Could not generate summary due to an error.";
+             }
+        }
+
+        // ** STABLE Key Phrase Extraction (Simplified TF) **
+        function extractKeyPhrases(text, numPhrases = 15) {
+             // console.log("extractKeyPhrases called");
+             if (!text) return [];
+             try {
+                 const words = tokenizeWords(text);
+                 const candidates = removeStopwords(words).filter(w => w.length > 2);
+                 const wordFreq = calculateTermFrequency(candidates);
+                 const sortedPhrases = Object.entries(wordFreq)
+                     .filter(([_, freq]) => freq > 1)
+                     .sort(([, freqA], [, freqB]) => freqB - freqA);
+                 const topPhrases = sortedPhrases.slice(0, numPhrases).map(([phrase]) => phrase);
+                 // console.log("extractKeyPhrases result:", topPhrases);
+                 return topPhrases;
+             } catch (error) {
+                 console.error("Error in extractKeyPhrases:", error);
+                 showAlert("Could not extract key phrases.", "error");
+                 return []; // Return empty array on error
+             }
+        }
+
+        // ** STABLE Sentiment Analysis (Simplified Lexicon + Negation) **
+        function analyzeSentiment(sentences) {
+            // console.log("analyzeSentiment called");
+             if (!sentences || sentences.length === 0) return { sentences: [], overallScore: 0 };
+             try {
+                 const lexicon = {
+                     'good': 1, 'great': 2, 'excellent': 2, 'happy': 1, 'love': 2, 'like': 1, 'positive': 1, 'success': 1, 'benefit': 1, 'helpful': 1, 'recommend': 1, 'nice': 1, 'well': 1, 'amazing': 2, 'wonderful': 2, 'best': 2, 'agree': 1, 'support': 1, 'fun': 1, 'enjoy': 1, 'easy': 0.5, 'impact': 0.5, // Added neutral/slightly positive
+                     'bad': -1, 'terrible': -2, 'awful': -2, 'poor': -1, 'horrible': -2, 'sad': -1, 'hate': -2, 'dislike': -1, 'problem': -1, 'issue': -1, 'negative': -1, 'fail': -1, 'difficult': -1, 'error': -1, 'mistake': -1, 'wrong': -1, 'disagree': -1, 'reject': -1, 'hurdles': -0.5, 'challenges': -0.5, 'bias': -1, 'biases': -1, 'badly': -1.5 // Added neutral/slightly negative
+                 };
+                 const negations = new Set(['not', 'no', 'never', 'don\'t', 'isn\'t', 'aren\'t', 'wasn\'t', 'weren\'t', 'didn\'t', 'doesn\'t', 'hadn\'t', 'hasn\'t', 'haven\'t', 'won\'t', 'wouldn\'t', 'shouldn\'t', 'can\'t', 'cannot', 'couldn\'t']);
+
+                 let totalScoreSum = 0;
+
+                 const sentenceResults = sentences.map((sentence) => {
+                     const words = tokenizeWords(sentence);
+                     let sentenceScore = 0;
+                     let isNegated = false;
+
+                     words.forEach((word) => {
+                         if (negations.has(word) || word.endsWith("n't")) {
+                             isNegated = true;
+                             return;
+                         }
+                         let score = lexicon[word];
+                         if (score !== undefined) {
+                             if (isNegated) {
+                                 score *= -1;
+                                 isNegated = false; // Reset after applying
+                             }
+                             sentenceScore += score;
+                         } else {
+                             // If word is not scored, reset negation so it doesn't carry over indefinitely
+                              isNegated = false;
+                         }
+                     });
+
+                     const wordCount = words.length || 1;
+                     const normalizedScore = sentenceScore / Math.sqrt(wordCount);
+                     const clampedScore = Math.max(-1, Math.min(1, normalizedScore / 2.0));
+
+                     let sentiment = 'neutral';
+                     if (clampedScore > 0.15) sentiment = 'positive';
+                     else if (clampedScore < -0.15) sentiment = 'negative';
+
+                     totalScoreSum += clampedScore;
+                     return { text: sentence, score: clampedScore, sentiment };
+                 });
+
+                 const overallScore = sentenceResults.length > 0 ? totalScoreSum / sentenceResults.length : 0;
+                 const finalResult = { sentences: sentenceResults, overallScore: Math.max(-1, Math.min(1, overallScore)) };
+                 // console.log("analyzeSentiment final result:", finalResult);
+                 return finalResult;
+
+             } catch (error) {
+                 console.error("Error in analyzeSentiment:", error);
+                 showAlert("Could not analyze sentiment.", "error");
+                 return { sentences: [], overallScore: 0 };
+             }
+        }
+
+
+        // --- UI Update Functions ---
+
+        // ** REVISED displayKeyPhrases **
+        function displayKeyPhrases(keyPhrases) {
+            // console.log("displayKeyPhrases called with:", keyPhrases);
+            if (!keyPhrasesList) { console.error("Key phrases list element not found!"); return; }
+
+             keyPhrasesList.innerHTML = ''; // Clear previous content reliably
+
+             if (!keyPhrases || keyPhrases.length === 0) {
+                 keyPhrasesList.innerHTML = '<i>No significant key phrases extracted.</i>';
+                 // console.log("displayKeyPhrases: No phrases to display.");
+                 return;
+             }
+
+             // Create a document fragment for efficiency
+             const fragment = document.createDocumentFragment();
+             keyPhrases.forEach((phrase, index) => {
+                 try {
+                    const phraseElement = document.createElement('div');
+                    phraseElement.className = 'key-phrase';
+                    phraseElement.textContent = phrase;
+                    fragment.appendChild(phraseElement); // Append to fragment
+                 } catch(error) {
+                     console.error(`Error creating phrase element ${index}:`, error, "for phrase:", phrase);
+                 }
+             });
+
+             keyPhrasesList.appendChild(fragment); // Append fragment to the DOM once
+             // console.log("displayKeyPhrases: Phrases displayed.");
+         }
+
+         // ** REVISED displaySentimentResults **
+        function displaySentimentResults(sentimentResults) {
+            // console.log("displaySentimentResults called with:", sentimentResults);
+             // Check essential elements exist
+             if (!sentimentIndicator || !overallSentimentLabel || !sentenceAnalysis || !positiveSentencesStat || !neutralSentencesStat || !negativeSentencesStat) {
+                console.error("One or more sentiment display elements are missing!");
+                return;
+            }
+
+            try {
+                const overallScore = sentimentResults?.overallScore ?? 0;
+                const sentences = sentimentResults?.sentences ?? [];
+
+                // Update overall meter and label
+                const sentimentPercentage = Math.max(0, Math.min(100, ((overallScore + 1) / 2) * 100));
+                sentimentIndicator.style.left = `${sentimentPercentage}%`;
+
+                if (overallScore > 0.15) overallSentimentLabel.textContent = 'Overall Positive';
+                else if (overallScore < -0.15) overallSentimentLabel.textContent = 'Overall Negative';
+                else overallSentimentLabel.textContent = 'Overall Neutral';
+
+                // Display SENTENCE LEVEL analysis
+                sentenceAnalysis.innerHTML = ''; // Clear previous sentences reliably
+                const sentenceFragment = document.createDocumentFragment(); // Use fragment for sentence elements
+
+                if (sentences.length === 0) {
+                    sentenceAnalysis.innerHTML = '<i>No sentences analyzed for sentiment.</i>';
+                    // console.log("displaySentimentResults: No sentences to display.");
+                } else {
+                     // console.log(`displaySentimentResults: Displaying ${sentences.length} sentences.`);
+                    sentences.forEach((result, index) => {
+                        try {
+                            if (!result || typeof result.text !== 'string' || typeof result.score !== 'number' || typeof result.sentiment !== 'string') {
+                                console.warn(`Skipping invalid sentence result at index ${index}:`, result);
+                                return;
+                            }
+
+                            const sentenceElement = document.createElement('div');
+                            const sentimentClass = ['positive', 'negative', 'neutral'].includes(result.sentiment) ? result.sentiment : 'neutral';
+                            sentenceElement.className = `sentence ${sentimentClass}`; // Apply class to main div
+
+                            // Create text node for sentence content
+                             const textNode = document.createTextNode(result.text + ' '); // Add space before score
+                             sentenceElement.appendChild(textNode);
+
+                            // Create and append score span
+                            const scoreElement = document.createElement('span');
+                            scoreElement.className = `sentence-score ${sentimentClass}`; // Apply class to score span too
+                            const scoreValue = Math.round(result.score * 100);
+                            scoreElement.textContent = `${scoreValue >= 0 ? '+' : ''}${scoreValue}%`;
+                            sentenceElement.appendChild(scoreElement); // Append score span to sentence div
+
+                            sentenceFragment.appendChild(sentenceElement); // Append sentence div to fragment
+                        } catch(innerError) {
+                            console.error(`Error displaying sentence at index ${index}:`, innerError, "Result:", result);
+                        }
+                    });
+                     sentenceAnalysis.appendChild(sentenceFragment); // Append all sentences at once
+                }
+
+
+                // Update statistics counts
+                const counts = { positive: 0, neutral: 0, negative: 0 };
+                 sentences.forEach(result => {
+                    if (result && result.sentiment) {
+                        const sentimentClass = ['positive', 'negative', 'neutral'].includes(result.sentiment) ? result.sentiment : 'neutral';
+                        counts[sentimentClass]++;
+                    }
+                 });
+                const totalSentences = sentences.length;
+                positiveSentencesStat.textContent = totalSentences > 0 ? `${Math.round((counts.positive / totalSentences) * 100)}%` : '0%';
+                neutralSentencesStat.textContent = totalSentences > 0 ? `${Math.round((counts.neutral / totalSentences) * 100)}%` : '0%';
+                negativeSentencesStat.textContent = totalSentences > 0 ? `${Math.round((counts.negative / totalSentences) * 100)}%` : '0%';
+
+                // console.log("displaySentimentResults: Sentiment UI updated.");
+            } catch (error) {
+                 console.error("Error displaying sentiment results:", error);
+                 showAlert("Error displaying sentiment results.", "error");
+                  overallSentimentLabel.textContent = 'Error';
+                  sentenceAnalysis.innerHTML = '<i>Error displaying sentiment.</i>';
+                  positiveSentencesStat.textContent = 'N/A';
+                  neutralSentencesStat.textContent = 'N/A';
+                  negativeSentencesStat.textContent = 'N/A';
+            }
+         }
+
+         function updateStatistics(text, sentences) {
+             // console.log("updateStatistics called");
+            if (!wordCountStat || !sentenceCountStat || !charCountStat || !avgSentenceLengthStat || !readingTimeStat) {
+                 console.error("One or more statistics elements are missing!"); return;
+            }
+            try {
+                const wordTokens = text.trim() === '' ? [] : text.trim().split(/\s+/).filter(Boolean);
+                const wc = wordTokens.length;
+                const sc = sentences?.length ?? 0;
+                const cc = text.length;
+
+                wordCountStat.textContent = wc.toLocaleString();
+                sentenceCountStat.textContent = sc.toLocaleString();
+                charCountStat.textContent = cc.toLocaleString();
+                avgSentenceLengthStat.textContent = sc > 0 ? Math.round(wc / sc) : 0;
+                const readingTimeMinutes = wc > 0 ? Math.max(1, Math.round(wc / READING_SPEED_WPM)) : 0;
+                readingTimeStat.textContent = `${readingTimeMinutes} min`;
+                // console.log("updateStatistics: Stats updated.");
+             } catch(error) {
+                 console.error("Error updating statistics:", error);
+                 wordCountStat.textContent = 'N/A'; sentenceCountStat.textContent = 'N/A'; charCountStat.textContent = 'N/A';
+                 avgSentenceLengthStat.textContent = 'N/A'; readingTimeStat.textContent = 'N/A';
+             }
+         }
+
+
+        // --- Main Analysis Orchestration ---
+        function analyzeText() {
+            // console.log("analyzeText called"); // Keep logs if helpful
+            const text = textInput?.value?.trim() ?? '';
+            if (!text) { showAlert('Please enter text or upload a .txt file.', 'warning'); return; }
+            if (!summarizationCheck || !keyPhrasesCheck || !sentimentCheck) { showAlert('Error: Control checkboxes not found.', 'error'); return; }
+            if (!summarizationCheck.checked && !keyPhrasesCheck.checked && !sentimentCheck.checked) { showAlert('Please select at least one analysis feature.', 'warning'); return; }
+
+            if(resultsContainer) resultsContainer.style.display = 'none';
+            if(alertContainer) alertContainer.innerHTML = '';
+            const progressBar = showLoadingIndicator(true);
+            const progressInterval = simulateProgress(progressBar, 1000);
+
+            setTimeout(() => {
+                 // console.log("Starting analysis processing...");
+                 try {
+                     const sentences = splitIntoSentences(text);
+                     // console.log(`Split into ${sentences.length} sentences.`);
+                     updateStatistics(text, sentences);
+
+                     // Run selected analyses
+                     if (summarizationCheck.checked) {
+                         // console.log("Generating summary...");
+                         const summaryResult = generateSummary(sentences, parseFloat(summaryLength.value) / 100);
+                         if (summaryContent) {
+                            summaryContent.innerHTML = '';
+                            summaryResult.split('\n').forEach(para => { if (para.trim()) { const p = document.createElement('p'); p.textContent = para.trim(); summaryContent.appendChild(p); } });
+                            if (summaryContent.innerHTML === '') summaryContent.textContent = 'Could not generate summary.';
+                         }
+                         // console.log("Summary done.");
+                     } else {
+                         if (summaryContent) summaryContent.textContent = "Summarization not selected.";
+                     }
+
+                     if (keyPhrasesCheck.checked) {
+                         // console.log("Extracting key phrases...");
+                         const keyPhraseResult = extractKeyPhrases(text);
+                         displayKeyPhrases(keyPhraseResult);
+                     } else {
+                          displayKeyPhrases([]);
+                         if (keyPhrasesList) keyPhrasesList.textContent = 'Key phrase extraction not selected.';
+                     }
+
+                     if (sentimentCheck.checked) {
+                         // console.log("Analyzing sentiment...");
+                         const sentimentResult = analyzeSentiment(sentences);
+                         displaySentimentResults(sentimentResult);
+                     } else {
+                          displaySentimentResults({ sentences: [], overallScore: 0 });
+                          if(overallSentimentLabel) overallSentimentLabel.textContent = 'Not Analyzed';
+                          if(sentenceAnalysis) sentenceAnalysis.textContent = 'Sentiment analysis not selected.';
+                          if(positiveSentencesStat) positiveSentencesStat.textContent = 'N/A';
+                          if(neutralSentencesStat) neutralSentencesStat.textContent = 'N/A';
+                          if(negativeSentencesStat) negativeSentencesStat.textContent = 'N/A';
+                     }
+
+                     // --- Finish Up ---
+                     if(progressInterval) clearInterval(progressInterval);
+                     if(progressBar) progressBar.style.width = '100%';
+                     setTimeout(() => {
+                        showLoadingIndicator(false);
+                        if(resultsContainer) {
+                            resultsContainer.style.display = 'block';
+                            addCopyButton('summaryTab', '#summaryContent', 'Copy Summary');
+                            addCopyButton('keyPhrasesTab', '#keyPhrasesList', 'Copy Phrases');
+                            showAlert('Analysis complete!', 'success', 3000);
+                            resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                     }, 150);
+
+                 } catch (error) {
+                     console.error("Critical Analysis Error in analyzeText:", error);
+                     showAlert(`A critical error occurred during analysis: ${error.message}. Please check console.`, 'error', 0);
+                     if(progressInterval) clearInterval(progressInterval);
+                     showLoadingIndicator(false);
+                 }
+            }, 50);
+        }
+
+        // --- Initialization ---
+        function init() {
+            try {
+                if(copyrightYear) copyrightYear.textContent = new Date().getFullYear();
+                updateWordCount();
+                updateSummaryLengthValue();
+                addKeyboardShortcuts();
+                if(textInput) textInput.focus();
+                console.log("NLP Analyzer Initialized.");
+                if(summaryContent) summaryContent.textContent = 'Analysis results will appear here.';
+                if(keyPhrasesList) keyPhrasesList.textContent = '';
+                if(sentenceAnalysis) sentenceAnalysis.textContent = '';
+                // Add initial copy buttons (will be updated/re-added on analysis)
+                addCopyButton('summaryTab', '#summaryContent', 'Copy Summary');
+                addCopyButton('keyPhrasesTab', '#keyPhrasesList', 'Copy Phrases');
+             } catch (error) {
+                console.error("Error during initialization:", error);
+                const body = document.querySelector('body');
+                if(body) {
+                     const errorDiv = document.createElement('div');
+                     errorDiv.style.cssText = 'color:red; border:2px solid red; padding:10px; margin:10px; background:white; z-index: 9999; position: relative;';
+                     errorDiv.textContent = 'Error initializing the application. Please check the console (F12).';
+                     body.prepend(errorDiv);
+                }
+             }
+        }
+
+        function checkRequiredElements() {
+            const required = {
+                textInput, fileInput, wordCount, summaryLength, 
+                analyzeBtn, loadingIndicator, resultsContainer
+            };
+            
+            const missing = Object.entries(required)
+                .filter(([key, element]) => !element)
+                .map(([key]) => key);
+                
+            if (missing.length > 0) {
+                console.error('Missing required elements:', missing);
+                showAlert('Application initialization failed', 'error');
+                return false;
+            }
+            return true;
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+
+        // Add cleanup function for event listeners
+function cleanup() {
+    if (progressInterval) {
+        clearInterval(progressInterval);
+    }
+    // Remove event listeners
+    textInput?.removeEventListener('input', debouncedUpdateWordCount);
+    fileInput?.removeEventListener('change', handleFileUpload);
+    
+    // Clear any remaining alerts
+    if (alertContainer) {
+        alertContainer.innerHTML = '';
+    }
+}
+
+// Add to window unload event
+window.addEventListener('unload', cleanup);
+
+    </script>
+</body>
+</html>
